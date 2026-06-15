@@ -1,0 +1,609 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>Экзамен | Великое Содружество</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            background: #1e2a1a;
+            background-image: radial-gradient(circle at 10% 30%, #2c3e1f, #0f1a0b);
+            font-family: 'Segoe UI', 'Roboto', 'Palatino', Georgia, serif;
+            padding: 20px;
+            min-height: 100vh;
+        }
+
+        .scroll-container {
+            max-width: 1000px;
+            margin: 0 auto;
+            background: #fef8ed;
+            border-radius: 64px 40px 64px 40px;
+            box-shadow: 0 25px 45px rgba(0, 0, 0, 0.5), inset 0 1px 3px rgba(255, 245, 215, 0.8);
+            overflow: hidden;
+            padding: 20px 24px 40px;
+            transition: 0.2s;
+        }
+
+        /* шапка */
+        .vibe-header {
+            text-align: center;
+            border-bottom: 3px double #c6a27a;
+            margin-bottom: 30px;
+            padding-bottom: 18px;
+        }
+        .vibe-header h1 {
+            font-size: 2rem;
+            letter-spacing: 2px;
+            background: linear-gradient(135deg, #b56a2c, #795a34);
+            background-clip: text;
+            -webkit-background-clip: text;
+            color: transparent;
+            font-weight: 800;
+        }
+        .sub {
+            font-style: italic;
+            color: #7c623f;
+            font-size: 0.9rem;
+        }
+
+        /* карточки блоков — свитки */
+        .block-swipe {
+            background: #fffaf0;
+            border-radius: 32px;
+            padding: 20px 22px 28px;
+            margin-bottom: 38px;
+            box-shadow: 0 10px 20px rgba(0, 0, 0, 0.05);
+            border: 1px solid #eeddbb;
+        }
+        .block-title {
+            font-size: 1.8rem;
+            font-weight: bold;
+            margin-bottom: 24px;
+            padding-left: 16px;
+            border-left: 7px solid #c0813a;
+            color: #3e2a1b;
+        }
+        .question-item {
+            background: #fff9ef;
+            margin-bottom: 28px;
+            padding: 12px 18px;
+            border-radius: 28px;
+            transition: all 0.1s;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.03);
+        }
+        .question-text {
+            font-weight: 700;
+            margin-bottom: 12px;
+            font-size: 1.05rem;
+            color: #352415;
+        }
+        .options {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 14px;
+            margin-top: 10px;
+        }
+        .opt-label {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            background: #e9dfce;
+            padding: 6px 18px;
+            border-radius: 50px;
+            cursor: pointer;
+            transition: 0.1s;
+            font-weight: normal;
+        }
+        .opt-label.selected {
+            background: #dbbc91;
+            color: #2d1b0c;
+            box-shadow: 0 2px 6px rgba(0,0,0,0.2);
+        }
+        input[type="radio"], input[type="checkbox"] {
+            accent-color: #b45f2a;
+            width: 18px;
+            height: 18px;
+        }
+        .dict-input {
+            width: 100%;
+            padding: 10px 18px;
+            border-radius: 50px;
+            border: 1px solid #dabb8c;
+            background: #fffff2;
+            font-size: 0.95rem;
+            margin-top: 8px;
+            font-family: inherit;
+        }
+        hr {
+            margin: 20px 0;
+            border-color: #eddbbc;
+        }
+        .btn-wrap {
+            text-align: center;
+            margin: 30px 0 20px;
+        }
+        .btn {
+            background: #9f6a3a;
+            border: none;
+            padding: 12px 32px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            border-radius: 60px;
+            color: white;
+            cursor: pointer;
+            transition: 0.15s;
+            box-shadow: 0 4px 0 #543d24;
+        }
+        .btn:active {
+            transform: translateY(2px);
+            box-shadow: 0 1px 0 #543d24;
+        }
+        .timer-block {
+            font-family: monospace;
+            background: #2e281f;
+            display: inline-block;
+            padding: 6px 20px;
+            border-radius: 60px;
+            color: #ffd89a;
+            font-weight: bold;
+            font-size: 1.2rem;
+            margin-bottom: 15px;
+        }
+        .player-badge {
+            background: #e2cfae;
+            border-radius: 40px;
+            padding: 6px 18px;
+            display: inline-block;
+            font-size: 0.85rem;
+            font-weight: bold;
+            color: #4f321b;
+        }
+        .finish-message {
+            background: #e3d4b5;
+            border-radius: 40px;
+            padding: 15px;
+            text-align: center;
+            font-size: 1.1rem;
+            color: #2f2a1f;
+        }
+        .hidden {
+            display: none;
+        }
+        .civ-grid {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 14px;
+            margin: 20px 0;
+        }
+        .civ-card {
+            background: #cfba93;
+            border-radius: 60px;
+            padding: 10px 20px;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.1s;
+            color: #2e241a;
+            border: 2px solid transparent;
+        }
+        .civ-card.selected {
+            background: #f0bc77;
+            border-color: #fff0c0;
+            color: #261d12;
+            box-shadow: 0 0 0 2px #a5682c;
+        }
+        input#playerName {
+            padding: 12px 24px;
+            width: 280px;
+            border-radius: 60px;
+            border: 1px solid #b28b5e;
+            font-size: 1rem;
+            background: #fffae9;
+            text-align: center;
+        }
+        .warning {
+            color: #bd5520;
+            font-size: 0.9rem;
+            margin-top: 12px;
+        }
+        @media (max-width: 660px) {
+            .scroll-container {
+                padding: 16px;
+            }
+            .options {
+                flex-direction: column;
+                gap: 8px;
+            }
+            .opt-label {
+                width: 100%;
+                justify-content: space-between;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="scroll-container" id="examApp">
+    <div id="entryScreen">
+        <div class="vibe-header">
+            <h1>ЭКЗАМЕН ВЕЛИКОГО СОДРУЖЕСТВА</h1>
+        </div>
+        <div style="text-align:center; padding: 15px 0;">
+          
+           
+            <h3 style="margin-top: 32px;">Выбери свою цивилизацию</h3>
+            <div class="civ-grid" id="civSelector"></div>
+            <div id="entryWarning" class="warning"></div>
+            <div class="btn-wrap">
+                <button class="btn" id="startExamBtn">Начать час испытания</button>
+            </div>
+            <div class="finish-message" style="margin-top: 30px;">
+                «Шесть путей, одна истина. Час даётся на свершения»
+            </div>
+        </div>
+    </div>
+
+    <div id="testArea" class="hidden">
+        <div class="vibe-header">
+            <h1>ЭКЗАМЕНАЦИОННЫЙ СВИТОК</h1>
+            <div class="timer-block" id="timerDisplay">01:00:00</div>
+            <div id="playerCivLabel" class="player-badge"></div>
+        </div>
+
+       
+        <div class="block-swipe">
+            <div class="block-title">Часть 1. История твоей цивилизации</div>
+            <div id="historyQuestionsBlock"></div>
+        </div>
+
+        <div class="block-swipe">
+            <div class="block-title">Часть 2. Игровое ведомство & механики</div>
+            <div id="gameBlock"></div>
+        </div>
+
+        
+        <div class="block-swipe">
+            <div class="block-title">Часть 3. Словарь Великого Содружества</div>
+            <div id="dictionaryBlock"></div>
+        </div>
+
+    
+        <div class="block-swipe">
+            <div class="block-title">Часть 4. Печати Героев Древнего мира</div>
+            <div id="sealsBlock"></div>
+        </div>
+
+        <div class="btn-wrap">
+            <button class="btn" id="finalSubmitBtn">Завершить экзамен</button>
+        </div>
+        <div id="finalMessagePlace"></div>
+    </div>
+</div>
+
+<script>
+async function sendToServer(answers) {
+    const payload = {
+        player: playerNameFull,
+        civilization: currentCivKey,
+        judge: civData[currentCivKey].judgeName,
+        answers: answers
+    };
+    
+    try {
+        const response = await fetch('/submit', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+        });
+        console.log('✅ Отправлено на сервер');
+    } catch(e) {
+        console.error('Ошибка отправки:', e);
+    }
+}
+    const civData = {
+        "Двуречье": {
+            fullName: "Двуречье",
+            judgeName: "Дейнис",
+            history: [
+                { text: "1. Государства в Двуречье возникли:", opts: ["почти в то же время, что и в долине Нила", "раньше, чем в долине Нила", "позже, чем в долине Нила"], correctIdx: 0 },
+                { text: "2. Какое число считалось священным в Двуречье?", opts: ["15", "30", "60", "90"], correctIdx: 2 },
+                { text: "3. Двуречье – это территория между реками:", opts: ["Арагва и Кура", "Инд и Ганг", "Тигр и Евфрат", "Евфрат и Нил"], correctIdx: 2 },
+                { text: "4. В Южном Двуречье дома возводили из глиняных кирпичей, потому что:", opts: ["в таких домах было прохладно", "дерева и камня не хватало", "так требовали жрецы", "это самый дешёвый способ"], correctIdx: 1 },
+                { text: "5. Вытянутые треугольные значки на табличках называются:", opts: ["скоропись", "клинопись", "иероглифы", "алфавит"], correctIdx: 1 },
+                { text: "6. Каким богам поклонялись в Двуречье? (выбери два)", opts: ["бог реки Хапи", "богиня неба Нут", "бог Солнца Шамаш", "царь загробного мира Осирис", "бог Луны Син"], multi: true, correctIdx: [2,4] },
+                { text: "7. Прочитайте небольшой отрывок из мифа: «отправился герой искать себе бессмертия. Раздобыл он траву жизни, от которой старик молодеет. Но лишь уснул, подкрался змей и проглотил её». О ком (о чем) это миф?", opts: ["о потопе", "об Осирисе и Исиде", "о Гильгамеше", "о Хаммурапи"], correctIdx: 2 },
+                { text: "8. Ростовщиками называли:", opts: ["людей, долги которых росли", "тех, кто требовал вернуть больше, чем давал", "садовников", "высоких людей"], correctIdx: 1 },
+                { text: "9. Какую цель преследовали законы царя Хаммурапи? Если раб человека ударил по щеке сына человека, то ему должны отрезать ухо. Если человек ударил по щеке человека высшего по положению, чем он сам, то он должен быть отхлестан в собрании воловьей плетью 60 раз.:", opts: ["запрет рукоприкладства", "закрепляли неравенство", "защита рабов", "равные права"], correctIdx: 1 },
+                { text: "10. Хаммурапи изображали с богами, т.к.:", opts: ["клинопись", "религиозные верования", "власть от богов", "сын Ра"], correctIdx: 2 }
+            ]
+        },
+        "Греция": {
+            fullName: "Древняя Греция", judgeName: "Терра",
+            history: [
+                { text: "1. Древняя Греция находится:", opts: ["в Европе", "в Африке", "на Востоке"], correctIdx: 0 },
+                { text: "2. Фреска – это:", opts: ["танец", "картина по сырой штукатурке", "мозаика"], correctIdx: 1 },
+                { text: "3. Создатели «Илиады» и «Одиссеи»:", opts: ["Перикл", "Геродот", "Гомер"], correctIdx: 2 },
+                { text: "4. Колония в Греции:", opts: ["поселение в других странах", "налог", "пошлина"], correctIdx: 0 },
+                { text: "5. Реформа Солона:", opts: ["46 г. до н.э.", "443 г. до н.э.", "594 г. до н.э."], correctIdx: 2 },
+                { text: "6. Демократия – это:", opts: ["совет старейшин", "власть демоса", "союз рабов"], correctIdx: 1 },
+                { text: "7. Кого афиняне выбирали стратегом 15 раз:", opts: ["Перикла", "Леонида", "Солона"], correctIdx: 0 },
+                { text: "8. Илоты в Спарте – это:", opts: ["кочевники", "воины", "захваченные рабы"], correctIdx: 2 },
+                { text: "9. Какая битва произошла в 490 г. до н.э. недалеко от Афин?", opts: ["Марафонская", "Фермопилы", "Саламин"], correctIdx: 0 },
+                { text: "10. Кого в Афинах называли гражданами", opts: ["все жители", "коренные афиняне", "переселенцы"], correctIdx: 1 },
+                { text: "11. Решающая битва греко-персидских войн:", opts: ["Марафон", "Фермопилы", "Саламин"], correctIdx: 2 },
+                { text: "12. Кому принадлежат слова: «Мы положим иго рабства как на виновных перед нами (т.е. сражавшихся с персами), так и на невинных».", opts: ["Ксеркс", "Перикл", "Дарий I"], correctIdx: 0 }
+            ]
+        },
+        "Рось": { fullName: "Рось", judgeName: "Рада",
+            history: [
+                { text: "1. Возникновение Древнерусского государства:", opts: ["VIII в.", "IX в.", "X в.", "XIX в."], correctIdx: 1 },
+                { text: "2. Погодные записи событий XI-XVII вв.:", opts: ["летописи", "степные книги", "жития", "былины"], correctIdx: 0 },
+                { text: "3. Принятие Русью христианства:", opts: ["907г.", "945г.", "988г.", "1097г."], correctIdx: 2 },
+                { text: "4. Прочитайте отрывок из летописи и отметьте, о каком князе идет речь. «…и легко ходил в походах, и много воевал. В походах же не возил за собою ни возов, ни котлов, не варил мяса. Не имел он и шатра, но спал, подостлав потник, с седлом в головах… И посылал в иные земли со словами: «Иду на вы».", opts: ["Ярослав Мудрый", "Святослав", "Владимир Красное Солнышко", "Игорь"], correctIdx: 1 },
+                { text: "5. Создатели славянской письменности:", opts: ["Ярослав Мудрый", "Кирилл и Мефодий", "Борис и Глеб", "Нестор"], correctIdx: 1 },
+                { text: "6. Какой князь из названных прославился на века «Поучением детям» и победами над половцами, а его правление стало ярким завершением истории Древнерусского государства с центром в Киеве?", opts: ["Владимир Мономах", "Ярослав Мудрый", "Владимир Святой", "Всеволод"], correctIdx: 0 },
+                { text: "7. Автор «Повести временных лет»:", opts: ["митрополит Петр", "Нестор", "монах Лаврентий", "епископ Иона"], correctIdx: 1 },
+                { text: "8. Прочитайте отрывок из работы Н.М.Карамзина и напишите имя князя, о котором идет речь в тексте. «сей князь, названный церковью равноапостольным, заслужил в истории имя Великого. Главное право его на вечную славу и благодарность потомства состоит, конечно, в том, что он поставил россиян на путь истинной веры; но имя Великого принадлежит ему за дела государственные».", opts: ["Олег", "Игорь", "Владимир Святой", "Ярослав"], correctIdx: 2 },
+                {text: "9. Соответствие: Игорь Старый →", opts: ["восстание древлян", "разгром половцев", "начало письменного законодательства", "объединение Киева и Новгорода"], correctIdx: 2  },
+                { text: "10. Соответствие: Ярослав Мудрый →", opts: ["восстание древлян", "разгром половцев", "начало письменного законодательства", "объединение Киева и Новгорода"], correctIdx: 2 }
+            ]
+        },
+        "Индия": { fullName: "Индия", judgeName: "Сумантра",
+            history: [
+                { text: "1. Горы, защищающие Индию с севера:", opts: ["Тянь-Шань", "Альпы", "Гималаи"], correctIdx: 2 },
+                { text: "2. Джунгли — это:", opts: ["заросли деревьев", "охота на мамонтов", "каменистые преграды"], correctIdx: 0 },
+                { text: "3. Что выращивали индийцы?", opts: ["рис, хлопчатник, сахарный тростник", "картофель", "помидоры"], correctIdx: 0 },
+                { text: "4. Главный бог индийцев:", opts: ["Шаман", "Брахма", "Гамет"], correctIdx: 1 },
+                { text: "5. Каста – это:", opts: ["эксплуатация", "несколько родов", "группы с правами и обязанностями"], correctIdx: 2 },
+                { text: "6. Объединение индийских царств:", opts: ["V в. до н.э.", "I в. до н.э.", "III в. до н.э."], correctIdx: 2 },
+                { text: "7. Люди не входящие в касты:", opts: ["живые убитые", "чужие", "неприкасаемые"], correctIdx: 2 },
+                { text: "8. Царь, объединивший Индию:", opts: ["Рама", "Ашока", "Чандрагупта"], correctIdx: 1 },
+                { text: "9. Что изобрели в Древней Индии и используем сейчас:", opts: ["шахматы", "компас", "письменность"], correctIdx: 0 }
+            ]
+        },
+        "Китай": { fullName: "Китай", judgeName: "Юньси",
+            history: [
+                { text: "1. «Блуждающая река», горе Китая:", opts: ["Ганг", "Янцзы", "Хуанхэ"], correctIdx: 2 },
+                { text: "2. Особо развитая отрасль хозяйства:", opts: ["шелководство", "мореплавание", "скотоводство"], correctIdx: 0 },
+                { text: "3. Аренда – это:", opts: ["отображение жизни людей в танцах, песнях, рисунках", "временное пользование за плату земель или другого имущества", "способ завлечения различных животных в западню"], correctIdx: 1 },
+                { text: "4. Образование единого государства в Китае:", opts: ["5 тыс. до н.э.", "3-2 тыс. до н.э.", "1 тыс. до н.э."], correctIdx: 1 },
+                { text: "5. Миф, родиной которого является Китай:", opts: ["о Великом Юе", "о всемирном потопе", "о Будде"], correctIdx: 0 },
+                { text: "6. Китайская письменность похожа на:", opts: ["индийскую", "египетскую", "греческую"], correctIdx: 1 },
+                { text: "7. Конфуций был:", opts: ["историком", "врачом", "мудрецом"], correctIdx: 2 },
+                { text: "8. Восстание в Китае произошло в:", opts: ["184 г. до н.э.", "221 г. до н.э.", "75 г. н.э."], correctIdx: 0 },
+                { text: "9. С какой целью была построена Великая Китайская стена?", opts: ["украшение", "защита от нападений", "показать власть"], correctIdx: 1 },
+                { text: "10. Древний китайский напиток, популярный ныне:", opts: ["чай", "кофе", "молоко"], correctIdx: 0 }
+            ]
+        },
+        "Египет": { fullName: "Египет", judgeName: "Нейла",
+            history: [
+                { text: "1. Древний Египет находился:", opts: ["в Африке", "в Азии", "на Востоке"], correctIdx: 0 },
+                { text: "2. Оазис – это:", opts: ["каменистая преграда", "высокий тростник", "островки зелени"], correctIdx: 2 },
+                { text: "3. Главное занятие египтян:", opts: ["скотоводство", "земледелие", "торговля"], correctIdx: 1 },
+                { text: "4. Образование государств в Египте:", opts: ["2 тыс. лет до н.э.", "5 тыс. лет до н.э.", "3 тыс. лет до н.э."], correctIdx: 2 },
+                { text: "5. Материал для письма:", opts: ["папирус", "глина", "бумага"], correctIdx: 0 },
+                { text: "6. Вельможи – это:", opts: ["воины", "знатные советники", "слуги фараона"], correctIdx: 1 },
+                { text: "7. Тутмос III был:", opts: ["фараоном", "историком", "вельможей"], correctIdx: 0 },
+                { text: "8. Жилище богов:", opts: ["пирамида", "храм", "саркофаг"], correctIdx: 1 },
+                { text: "9. Пирамида Хеопса построена около:", opts: ["1500 лет до н.э.", "4000 лет до н.э.", "2600 лет до н.э."], correctIdx: 2 },
+                { text: "10. Культура – это:", opts: ["достижения в науке, искусстве", "строительство зданий", "сказания"], correctIdx: 0 },
+                { text: "11. Злой бог Суховей (Сет):", opts: ["Тоб", "Ра", "Сет"], correctIdx: 2 },
+                { text: "12. Рабовладельческий строй:", opts: ["совместная жизнь без классов", "эксплуатация людей"], correctIdx: 1 }
+            ]
+        }
+    };
+
+    // общие блоки: игровой компонент + словарь + печати
+    const gameQuestions = [
+        { text: "1. Сколько глав в ведомствах?", opts: ["6", "5", "8", "7"], correctIdx: 3 },
+        { text: "2. Должностей в ведомстве международных отношений?", opts: ["1", "3", "2", "4"], correctIdx: 1 },
+        { text: "3. Сколько олимпиоников в культурном ведомстве?", opts: ["7", "8", "5", "7-10"], correctIdx: 0 },
+        { text: "4. Сколько летописцев могут писать летопись?", opts: ["3", "5", "4", "6"], correctIdx: 2 },
+        { text: "5. Кто входит в народное ведомство? (несколько)", opts: ["Флагоносцы", "Вестники", "Ученые", "Посыльные", "Купцы", "Разведчики"], multi: true, correctIdx: [0,1,3,4] },
+        { text: "6. Сколько купцов ходят на торжище?", opts: ["1", "4", "3", "2"], correctIdx: 3 },
+        { text: "7. Ключник входит в народное ведомство?", opts: ["Да", "Нет"], correctIdx: 1 },
+        { text: "8. Кто лишний в судебном ведомстве?", opts: ["Ключник", "Нотариус", "Юрист", "Казначей"], multi: true, correctIdx: [0,3] },
+        { text: "9. Сколько служителей муз в цивилизации?", opts: ["6", "7", "5", "9"], correctIdx: 1 },
+        { text: "10. Сколько печатей на договоре купли-продажи?", opts: ["1", "2", "3", "4"], correctIdx: 2 },
+        { text: "11. Кто узнает полезную информацию об ответах на образовательное задание у Верховых Судей?", opts: ["Ученый", "Правитель", "Глава ведомства", "Разведчик"], correctIdx: 3 }
+    ];
+
+    const dictionaryTerms = ["Год", "Великое Содружество", "Народное голосование", "Правитель", "Мастера", "Свиток первоначального капитала", "Сборы", "Владыки", "Мост", "Судья", "Верховный судья", "Наставник", "Младший наставник", "Старший наставник", "Артефакты", "Имя", "Международный рынок", "Верховный Совет", "Ведомственный Совет", "Час игры", "Зал зрелищ"];
+    
+    const seals = [
+    { text: "1. Печать ...... будет отдана тому народу, знания которого будут поистине велики и выйдут далеко за пределы границ своего государства. Печать, какого героя?", opts: ["Гомера", "Калидаса", "Заратуштры", "Имхотепа"], correctIdx: 0 },
+    { text: "2. Печать ...... гласит, что Легендарной станет та цивилизация, что сможет пуще других сохранить чистоту помыслов, являющейся в окружении и действиях людских. Печать, какого героя?", opts: ["Ли Тянь", "Тутанхамона", "Илья Муромца", "Пора"], correctIdx: 0 },
+    { text: "3. Печать ...... гласит, что Легендарной станет тот народ, чья дисциплина и соблюдение законов не позволит сойти с пути верного. Печать, какого героя?", opts: ["Калидаса", "Хаммурапи", "Конфуция", "Геракла"], correctIdx: 1 },
+    { text: "4. Печать ..... гласит, что Легендарным станет тот народ, чье толкование истории и её описание будет красноречивее всех иных. Печать, какого героя?", opts: ["Илья Муромца", "Гомера", "Нестора", "Имхотепа"], correctIdx: 2 },
+    { text: "5. Печать ...... – строительство двух Чудес света из других цивилизаций. Печать, какого героя?", opts: ["Имхотепа", "Заратуштры", "Хаммурапи", "Конфуция"], correctIdx: 0 },
+    { text: "6. Печати ..... гласит, что Легендарной станет та Цивилизация, которая сможет, как можно больше собрать артефактов Древнего мира. Печать, какого героя?", opts: ["Ильи Муромца", "Ли Тянь", "Пора", "Тутанхамона"], correctIdx: 3 },
+    { text: "7. Печать ...... – будет отдана самому атлетичному народу. Печать, какого героя?", opts: ["Гомера", "Геракла", "Нестора", "Калидаса"], correctIdx: 1 },
+    { text: "8. Печать ..... гласит, что Легендарной цивилизацией станет та, которая докажет, что не только в тяжелом труде проходит жизнь великого народа, но и в праздниках. Печать, какого героя?", opts: ["Калидаса", "Конфуция", "Заратуштры", "Ли Тянь"], correctIdx: 2 },
+    { text: "9. Печать ..... гласит, что богатейший народ – умнейший, а от того и Легендарный. Печать, какого героя?", opts: ["Тутанхамона", "Нестора", "Геракла", "Пора"], correctIdx: 3 },
+    { text: "10. Печать ..... гласит, что Легендарной цивилизацией станет та, которая продемонстрирует наилучшим образом достоинства и заслуги народа своего. Печать, какого героя?", opts: ["Нестора", "Гомера", "Илья Муромца", "Конфуция"], correctIdx: 2 },
+    { text: "11. Печать ...... гласит, что победу в соревнованиях заслужит то государство, которое докажет, что культура их страны чтится куда больше военного и иного дела. Печать, какого героя?", opts: ["Калидаса", "Геракла", "Хаммурапи", "Нестора"], correctIdx: 0 },
+];
+
+    let currentCivKey = null;
+    let playerNameFull = "";
+    let timerInterval = null;
+    let startTime = null;
+    let answersStore = {};
+
+    function renderCivButtons() {
+        const container = document.getElementById("civSelector");
+        container.innerHTML = "";
+        for (let key of Object.keys(civData)) {
+            const btn = document.createElement("div");
+            btn.className = "civ-card";
+            btn.innerText = `${key} (${civData[key].judgeName})`;
+            btn.dataset.civ = key;
+            btn.onclick = () => {
+                document.querySelectorAll(".civ-card").forEach(c => c.classList.remove("selected"));
+                btn.classList.add("selected");
+                currentCivKey = key;
+            };
+            container.appendChild(btn);
+        }
+    }
+
+    function generateHistoryHTML(civKey) {
+        let qs = civData[civKey].history;
+        let html = "";
+        qs.forEach((q, idx) => {
+            html += `<div class="question-item" data-qset="hist" data-idx="${idx}"><div class="question-text">${q.text}</div><div class="options" id="hist-${idx}">`;
+            if(q.multi){
+                q.opts.forEach((opt, oi) => { html += `<label class="opt-label"><input type="checkbox" name="hist_${idx}" value="${oi}"> ${opt}</label>`; });
+            } else {
+                q.opts.forEach((opt, oi) => { html += `<label class="opt-label"><input type="radio" name="hist_${idx}" value="${oi}"> ${opt}</label>`; });
+            }
+            html += `</div></div>`;
+        });
+        return html;
+    }
+
+    function renderGame() { let h=""; gameQuestions.forEach((q,i)=>{ h+=`<div class="question-item"><div class="question-text">${q.text}</div><div class="options" id="game-${i}">`; if(q.multi){ q.opts.forEach((o,oi)=>{ h+=`<label class="opt-label"><input type="checkbox" name="game_${i}" value="${oi}"> ${o}</label>`;}); } else { q.opts.forEach((o,oi)=>{ h+=`<label class="opt-label"><input type="radio" name="game_${i}" value="${oi}"> ${o}</label>`;}); } h+=`</div></div>`; }); return h; }
+    function renderDictionary() { let h=""; dictionaryTerms.forEach((t,i)=>{ h+=`<div class="question-item"><div class="question-text">📖 ${t}</div><input type="text" class="dict-input" data-dictidx="${i}" placeholder="Ваше толкование..."></div>`; }); return h; }
+    function renderSeals() { 
+    let h = ""; 
+    seals.forEach((q, i) => { 
+        h += `<div class="question-item">`;
+        h += `<div class="question-text">${q.text}</div>`;
+        h += `<div class="options" id="seal-${i}">`;
+        q.opts.forEach((o, oi) => { 
+            h += `<label class="opt-label"><input type="radio" name="seal_${i}" value="${oi}"> ${o}</label>`;
+        });
+        h += `</div></div>`; 
+    }); 
+    return h; 
+}
+// Вспомогательная функция: получает текст ответа из label
+function getOptionText(group, radio) {
+    const label = radio.closest('label');
+    if (label) {
+        return label.innerText.replace(radio, '').trim();
+    }
+    return radio.value;
+}
+    function collectAllAnswers() {
+    let answers = {};
+    
+    // 1. Сбор истории
+    const historyGroups = document.querySelectorAll('#historyQuestionsBlock .question-item');
+    historyGroups.forEach((group, idx) => {
+        const radios = group.querySelectorAll('input[type="radio"]:checked');
+        const checks = group.querySelectorAll('input[type="checkbox"]:checked');
+        const questionText = group.querySelector('.question-text')?.innerText || `Вопрос ${idx+1}`;
+        
+        if (radios.length) {
+            const optionText = getOptionText(group, radios[0]);
+            answers[`История_${idx+1}`] = `${questionText.substring(0, 100)} → Ответ: ${optionText}`;
+        }
+        if (checks.length) {
+            let selectedTexts = [];
+            checks.forEach(c => {
+                const label = c.closest('label');
+                selectedTexts.push(label ? label.innerText.replace(c, '').trim() : c.value);
+            });
+            answers[`История_${idx+1}`] = `${questionText.substring(0, 100)} → Ответы: ${selectedTexts.join(', ')}`;
+        }
+    });
+    
+    // 2. Сбор игрового компонента
+    const gameGroups = document.querySelectorAll('#gameBlock .question-item');
+    gameGroups.forEach((group, idx) => {
+        const radios = group.querySelectorAll('input[type="radio"]:checked');
+        const checks = group.querySelectorAll('input[type="checkbox"]:checked');
+        const questionText = group.querySelector('.question-text')?.innerText || `Вопрос ${idx+1}`;
+        
+        if (radios.length) {
+            const optionText = getOptionText(group, radios[0]);
+            answers[`Игровой_${idx+1}`] = `${questionText} → Ответ: ${optionText}`;
+        }
+        if (checks.length) {
+            let selectedTexts = [];
+            checks.forEach(c => {
+                const label = c.closest('label');
+                selectedTexts.push(label ? label.innerText.replace(c, '').trim() : c.value);
+            });
+            answers[`Игровой_${idx+1}`] = `${questionText} → Ответы: ${selectedTexts.join(', ')}`;
+        }
+    });
+    
+    // 3. Сбор словаря
+    const dictInputs = document.querySelectorAll('#dictionaryBlock .dict-input');
+    dictInputs.forEach((input, idx) => {
+        const term = dictionaryTerms[idx] || `Термин ${idx+1}`;
+        answers[`Словарь_${term}`] = input.value || '(не заполнено)';
+    });
+    
+    // 4. Сбор печатей (только radio, 11 вопросов)
+    const sealGroups = document.querySelectorAll('#sealsBlock .question-item');
+    sealGroups.forEach((group, idx) => {
+        const radios = group.querySelectorAll('input[type="radio"]:checked');
+        const questionText = group.querySelector('.question-text')?.innerText || `Печать ${idx+1}`;
+        
+        if (radios.length) {
+            const optionText = getOptionText(group, radios[0]);
+            answers[`Печать_${idx+1}`] = `${questionText.substring(0, 100)} → Ответ: ${optionText}`;
+        } else {
+            answers[`Печать_${idx+1}`] = `${questionText.substring(0, 100)} → Ответ: (не выбран)`;
+        }
+    });
+    
+    return answers;
+}
+
+async function submitFinal() {
+    console.log("=== НАЧАЛО ОТПРАВКИ ===");
+    
+    // Собираем ответы
+    const allAnswers = collectAllAnswers();
+    console.log("Собранные ответы:", allAnswers);
+    
+    // Отправляем на сервер Flask
+    await sendToServer(allAnswers);
+    
+    // Сообщение пользователю
+    document.getElementById("finalMessagePlace").innerHTML = `<div class="finish-message">Спасибо, твои ответы приняты.</div>`;
+    
+    if (timerInterval) clearInterval(timerInterval);
+    document.getElementById("finalSubmitBtn").disabled = true;
+}
+    function startTimerDisplay() {
+        if(timerInterval) clearInterval(timerInterval);
+        startTime = Date.now();
+        timerInterval = setInterval(() => {
+            let elapsed = Math.floor((Date.now() - startTime)/1000);
+            let remaining = Math.max(0, 3600 - elapsed);
+            let hours = Math.floor(remaining/3600);
+            let mins = Math.floor((remaining%3600)/60);
+            let secs = remaining%60;
+            document.getElementById("timerDisplay").innerText = `${hours.toString().padStart(2,'0')}:${mins.toString().padStart(2,'0')}:${secs.toString().padStart(2,'0')}`;
+            if(remaining <= 0) { clearInterval(timerInterval); alert("Час истёк! Экзамен завершён."); submitFinal(); }
+        }, 1000);
+    }
+
+    document.getElementById("startExamBtn").onclick = () => {
+       
+        if(!currentCivKey) { document.getElementById("entryWarning").innerText = "Выбери цивилизацию!"; return; }
+        playerNameFull = `Судья ${civData[currentCivKey].judgeName} (${civData[currentCivKey].fullName})`;;
+        document.getElementById("entryScreen").classList.add("hidden");
+        document.getElementById("testArea").classList.remove("hidden");
+        document.getElementById("playerCivLabel").innerHTML = `⚡ ${playerNameFull} | ${civData[currentCivKey].fullName}`;
+        document.getElementById("historyQuestionsBlock").innerHTML = generateHistoryHTML(currentCivKey);
+        document.getElementById("gameBlock").innerHTML = renderGame();
+        document.getElementById("dictionaryBlock").innerHTML = renderDictionary();
+        document.getElementById("sealsBlock").innerHTML = renderSeals();
+        startTimerDisplay();
+    };
+    document.getElementById("finalSubmitBtn").onclick = submitFinal;
+    renderCivButtons();
+</script>
+</body>
+</html>

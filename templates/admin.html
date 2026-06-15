@@ -1,0 +1,71 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <meta charset="UTF-8">
+    <title>Админ-панель | Ответы на экзамен</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body { background: #1e2a1a; font-family: 'Segoe UI', Arial; padding: 20px; }
+        .container { max-width: 1400px; margin: 0 auto; }
+        .header { background: #fef8ed; padding: 20px; border-radius: 30px; margin-bottom: 20px; display: flex; justify-content: space-between; align-items: center; }
+        .logout { background: #9f6a3a; color: white; padding: 8px 20px; border-radius: 30px; text-decoration: none; }
+        .answer-card { background: #fffaf2; border-radius: 30px; padding: 20px; margin-bottom: 20px; border-left: 10px solid #b56a2c; }
+        .answer-header { display: flex; justify-content: space-between; flex-wrap: wrap; margin-bottom: 15px; padding-bottom: 10px; border-bottom: 1px solid #eeddbb; }
+        .badge { background: #e2cfae; padding: 5px 15px; border-radius: 30px; font-size: 14px; }
+        .answers-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(400px, 1fr)); gap: 10px; margin-top: 15px; }
+        .answer-item { background: #f5ede0; padding: 10px; border-radius: 15px; font-size: 13px; word-break: break-word; }
+        .answer-question { font-weight: bold; color: #5a3a24; }
+        .delete-btn { background: #c44b3c; color: white; border: none; padding: 5px 15px; border-radius: 20px; cursor: pointer; }
+        .empty { text-align: center; padding: 50px; color: white; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1>📜 Ответы на экзамен</h1>
+            <a href="/admin/logout" class="logout">🚪 Выйти</a>
+        </div>
+        
+        {% if results %}
+            {% for result in results %}
+            <div class="answer-card" data-id="{{ result.id }}">
+                <div class="answer-header">
+                    <div>
+                        <strong>🕐 {{ result.timestamp }}</strong><br>
+                        <span class="badge">{{ result.player }}</span>
+                        <span class="badge">{{ result.civilization }}</span>
+                        <span class="badge">👨‍⚖️ {{ result.judge }}</span>
+                    </div>
+                    <button class="delete-btn" onclick="deleteAnswer('{{ result.id }}')">🗑 Удалить</button>
+                </div>
+                <div class="answers-grid">
+                    {% for key, value in result.answers.items() %}
+                        <div class="answer-item">
+                            <div class="answer-question">{{ key }}</div>
+                            <div>{{ value }}</div>
+                        </div>
+                    {% endfor %}
+                </div>
+            </div>
+            {% endfor %}
+        {% else %}
+            <div class="empty">
+                <h2>Пока нет ни одного ответа</h2>
+              
+            </div>
+        {% endif %}
+    </div>
+    
+    <script>
+        async function deleteAnswer(id) {
+            if (confirm('Удалить этот ответ?')) {
+                const response = await fetch('/admin/delete/' + id, { method: 'POST' });
+                if (response.ok) {
+                    const card = document.querySelector(`.answer-card[data-id="${id}"]`);
+                    card.remove();
+                }
+            }
+        }
+    </script>
+</body>
+</html>
