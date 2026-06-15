@@ -23,10 +23,14 @@ def init_db():
     )''')
     conn.commit()
     conn.close()
+    print("✅ База данных инициализирована")
+
+# ВЫЗЫВАЕМ ПРИ ЗАПУСКЕ (важно для Render!)
+init_db()
 
 @app.route('/')
 def exam():
-    return render_template('index.html')
+    return render_template('exam.html')
 
 @app.route('/submit', methods=['POST'])
 def submit():
@@ -97,5 +101,4 @@ def admin_logout():
     return redirect(url_for('admin_login'))
 
 if __name__ == '__main__':
-    init_db()
     app.run(debug=True)
